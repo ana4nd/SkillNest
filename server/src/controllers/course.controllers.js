@@ -13,7 +13,7 @@ export const addCourse = asyncHandler(async (req, res) => {
   }
   // console.log("file", req.file);
   const uploadedImage = await uploadOnCloudinary(
-    req.file.path,
+    req.file.buffer,
     "course-images",
   );
   const course = await Course.create({
@@ -74,6 +74,27 @@ export const deleteCourse = asyncHandler(async (req, res) => {
 
 
 
+// export const enrollCourse = asyncHandler(async (req, res) => {
+//   const { courseId } = req.params;
+
+//   const user = await User.findById(req.user._id);
+
+//   if (!user) {
+//     throw new ApiError(404, "User not found");
+//   }
+
+//   if (user.enrolledCourses.includes(courseId)) {
+//     throw ApiError("Already enrolled in Course");
+//   }
+
+//   user.enrolledCourses.push(courseId);
+//   await user.save();
+
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, user.courseId, "Enrolled successfully"));
+// });
+
 export const enrollCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
 
@@ -84,7 +105,7 @@ export const enrollCourse = asyncHandler(async (req, res) => {
   }
 
   if (user.enrolledCourses.includes(courseId)) {
-    throw ApiError("Already enrolled in Course");
+    throw new ApiError(400, "Already enrolled in Course");
   }
 
   user.enrolledCourses.push(courseId);
@@ -92,8 +113,9 @@ export const enrollCourse = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, user.courseId, "Enrolled successfully"));
+    .json(new ApiResponse(200, user.enrolledCourses, "Enrolled successfully"));
 });
+
 
 export const getEnrolledCourse = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate("enrolledCourses");
