@@ -3,9 +3,7 @@ import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
-import fs from "fs/promises";
-import path from "path";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import cloudinary, { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 //  ADD COURSE
 export const addCourse = asyncHandler(async (req, res) => {
@@ -66,23 +64,14 @@ export const deleteCourse = asyncHandler(async (req, res) => {
     await cloudinary.uploader.destroy(course.public_id);
   }
 
-  // Delete from local folder (if stored)
-  if (course.image) {
-    try {
-      const localPath = path.join("public/images", path.basename(course.image));
-      await fs.unlink(localPath);
-    } catch (err) {
-      console.log("Local file not found or already deleted");
-    }
-  }
-
-  // Delete from database
+  // Delete from DB
   await Course.deleteOne({ _id: course._id });
 
   return res.status(200).json(
     new ApiResponse(200, null, "Course deleted successfully")
   );
 });
+
 
 
 export const enrollCourse = asyncHandler(async (req, res) => {
